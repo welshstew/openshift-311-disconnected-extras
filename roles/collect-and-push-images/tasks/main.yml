@@ -1,0 +1,69 @@
+---
+- name: Login to registry.redhat.io
+  command: "podman login -u {{redhat_registry_username}} -p {{redhat_registry_password}}"
+  register: _registry_login
+
+- name: Copy core images into docker repo
+  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  loop: "{{  core_images.split(' ') | lower }}"
+  register: _create_core_images
+  async: 600  # Maximum runtime in seconds. Adjust as needed.
+  poll: 0  # Fire and continue (never poll)
+
+- name: Wait for core images to finish
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: _jobs
+  until: _jobs.finished
+  delay: 30  # Check every 5 seconds. Adjust as you like.
+  retries: 10  # Retry up to 10 times. Adjust as needed.
+  with_items: "{{ _create_core_images.results }}"
+
+- name: Copy etcd image into docker repo
+  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{etcd_image}} {{isolated_docker_repo}}/{{etcd_image}}" 
+  register: _create_etcd_image
+
+- name: Copy additional images into docker repo
+  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  loop: "{{  additional_images.split(' ') | lower }}"
+  register: _create_additional_images
+  async: 600  # Maximum runtime in seconds. Adjust as needed.
+  poll: 0  # Fire and continue (never poll)
+
+- name: Wait for additional images to finish
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: _jobs
+  until: _jobs.finished
+  delay: 30  # Check every 5 seconds. Adjust as you like.
+  retries: 10  # Retry up to 10 times. Adjust as needed.
+  with_items: "{{ _create_additional_images.results }}"
+
+- name: Copy s2i images into docker repo
+  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/{{item}}:{{openshift_version_image_tag}}" 
+  loop: "{{  s2i_images.split(' ') | lower }}"
+  register: _create_s2i_images
+  async: 600  # Maximum runtime in seconds. Adjust as needed.
+  poll: 0  # Fire and continue (never poll)
+
+- name: Wait for s2i images to finish
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: _jobs
+  until: _jobs.finished
+  delay: 30  # Check every 5 seconds. Adjust as you like.
+  retries: 10  # Retry up to 10 times. Adjust as needed.
+  with_items: "{{ _create_s2i_images.results }}"
+
+- name: Copy nexus3 into docker repo
+  command: "skopeo copy --dest-tls-verify=false docker://docker.io/{{item}}:latest {{isolated_docker_repo}}/{{item}}:latest" 
+  register: _create_nexus3
+  with_items:
+    - "sonatype/nexus3"
+
+- name: Copy gogs into docker repo
+  command: "skopeo copy --dest-tls-verify=false docker://docker.io/{{item}}:latest {{isolated_docker_repo}}/{{item}}:latest" 
+  register: _create_gogs
+  with_items:
+    - "wkulhanek/gogs"
+

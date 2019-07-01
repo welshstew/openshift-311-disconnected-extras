@@ -1,0 +1,37 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    description: Template to create pvs
+  name: pv-template
+objects:
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: ${PV_NAME}
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: ${PV_SIZE}
+    nfs:
+      path: ${PV_PATH}
+      server: ${PV_NFS_SERVER}
+    persistentVolumeReclaimPolicy: ${PV_RECLAIM_POLICY}
+parameters:
+- description: The name for the pv
+  name: PV_NAME
+  required: true
+- description: The size of the pv
+  name: PV_SIZE
+  required: true
+- description: Path on the NFS server
+  name: PV_PATH
+  required: true
+- description: NFS server
+  name: PV_NFS_SERVER
+  required: true
+- description: Reclaim Policy
+  name: PV_RECLAIM_POLICY
+  required: true  
+  value: Recycle

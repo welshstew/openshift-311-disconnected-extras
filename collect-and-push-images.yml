@@ -1,0 +1,8 @@
+---
+- name: Collect, Tag, and push images
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - name: Collect and push images
+      role: collect-and-push-images
