@@ -1,16 +1,16 @@
 ---
 - name: Login to registry.redhat.io with podman
-  command: "podman login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}'"
+  shell: "podman login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}'"
   register: _registry_login
   when: not use_docker
 
 - name: Login to registry.redhat.io with docker
-  command: "docker login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}'"
+  shell: "docker login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}'"
   register: _registry_login
   when: use_docker
 
 - name: Copy core images into docker repo with skopeo
-  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
   loop: "{{  core_images.split(' ') | lower }}"
   register: _create_core_images
   async: 600  # Maximum runtime in seconds. Adjust as needed.
@@ -18,7 +18,7 @@
   when: not use_docker
 
 - name: Copy core images into docker repo with docker
-  command: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  shell: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
   loop: "{{  core_images.split(' ') | lower }}"
   register: _create_core_images
   async: 600  # Maximum runtime in seconds. Adjust as needed.
@@ -35,17 +35,17 @@
   with_items: "{{ _create_core_images.results }}"
 
 - name: Copy etcd image into docker repo with skopeo
-  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{etcd_image}} docker://{{isolated_docker_repo}}/{{etcd_image}}" 
+  shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{etcd_image}} docker://{{isolated_docker_repo}}/{{etcd_image}}" 
   register: _create_etcd_image
   when: not use_docker
 
 - name: Copy etcd image into docker repo with docker
-  command: "docker pull registry.redhat.io/{{etcd_image}} && docker tag registry.redhat.io/{{etcd_image}} {{isolated_docker_repo}}/{{etcd_image}}  && docker push {{isolated_docker_repo}}/{{etcd_image}}" 
+  shell: "docker pull registry.redhat.io/{{etcd_image}} && docker tag registry.redhat.io/{{etcd_image}} {{isolated_docker_repo}}/{{etcd_image}}  && docker push {{isolated_docker_repo}}/{{etcd_image}}" 
   register: _create_etcd_image
   when: use_docker
 
 - name: Copy additional images into docker repo with skopeo
-  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
   loop: "{{  additional_images.split(' ') | lower }}"
   register: _create_additional_images
   async: 600  # Maximum runtime in seconds. Adjust as needed.
@@ -53,7 +53,7 @@
   when: not use_docker
 
 - name: Copy additional images into docker repo with docker
-  command: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  shell: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
   loop: "{{  additional_images.split(' ') | lower }}"
   register: _create_additional_images
   async: 600  # Maximum runtime in seconds. Adjust as needed.
@@ -70,7 +70,7 @@
   with_items: "{{ _create_additional_images.results }}"
 
 - name: Copy s2i images into docker repo with skopeo
-  command: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/{{item}}:{{openshift_version_image_tag}}" 
+  shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/{{item}}:{{openshift_version_image_tag}}" 
   loop: "{{  s2i_images.split(' ') | lower }}"
   register: _create_s2i_images
   async: 600  # Maximum runtime in seconds. Adjust as needed.
@@ -78,7 +78,7 @@
   when: not use_docker
 
 - name: Copy s2i images into docker repo with docker
-  command: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
+  shell: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
   loop: "{{  s2i_images.split(' ') | lower }}"
   register: _create_s2i_images
   async: 600  # Maximum runtime in seconds. Adjust as needed.
@@ -95,7 +95,7 @@
   with_items: "{{ _create_s2i_images.results }}"
 
 - name: Copy nexus3 and gogs into docker repo with skopeo
-  command: "skopeo copy --dest-tls-verify=false docker://docker.io/{{item}}:latest docker://{{isolated_docker_repo}}/{{item}}:latest" 
+  shell: "skopeo copy --dest-tls-verify=false docker://docker.io/{{item}}:latest docker://{{isolated_docker_repo}}/{{item}}:latest" 
   register: _create_nexus3
   with_items:
     - "sonatype/nexus3"
@@ -103,7 +103,7 @@
   when: not use_docker
 
 - name: Copy nexus3 and gogs into docker repo with docker
-  command: "docker pull docker.io/{{item}}:latest && docker tag docker.io/{{item}}:latest {{isolated_docker_repo}}/{{item}}:latest && docker push {{isolated_docker_repo}}/{{item}}:latest" 
+  shell: "docker pull docker.io/{{item}}:latest && docker tag docker.io/{{item}}:latest {{isolated_docker_repo}}/{{item}}:latest && docker push {{isolated_docker_repo}}/{{item}}:latest" 
   register: _create_nexus3
   with_items:
     - "sonatype/nexus3"
