@@ -65,6 +65,7 @@
   async: 600  # Maximum runtime in seconds. Adjust as needed.
   poll: 0  # Fire and continue (never poll)
   when: use_docker
+  ignore_errors: yes
 
 - name: Wait for additional images to finish
   async_status:
@@ -74,6 +75,7 @@
   delay: 30  # Check every 5 seconds. Adjust as you like.
   retries: 10  # Retry up to 10 times. Adjust as needed.
   with_items: "{{ _create_additional_images.results }}"
+  ignore_errors: yes
 
 - name: Copy s2i images into docker repo with skopeo
   shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/{{item}}:{{openshift_version_image_tag}}" 
