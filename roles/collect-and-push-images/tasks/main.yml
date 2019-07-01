@@ -1,6 +1,6 @@
 ---
 - name: Login to registry.redhat.io
-  command: "podman login -u {{redhat_registry_username}} -p {{redhat_registry_password}}"
+  command: "podman login registry.redhat.io -u '{{redhat_registry_username}}' -p {{redhat_registry_password}}"
   register: _registry_login
 
 - name: Copy core images into docker repo
