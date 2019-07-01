@@ -1,11 +1,11 @@
 ---
 - name: Login to registry.redhat.io with podman
-  command: "podman login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}''"
+  command: "podman login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}'"
   register: _registry_login
   when: not use_docker
 
 - name: Login to registry.redhat.io with docker
-  command: "docker login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}''"
+  command: "docker login registry.redhat.io -u '{{redhat_registry_username}}' -p '{{redhat_registry_password}}'"
   register: _registry_login
   when: use_docker
 
@@ -109,5 +109,3 @@
     - "sonatype/nexus3"
     - "wkulhanek/gogs"
   when: use_docker
-
-
