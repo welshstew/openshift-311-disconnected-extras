@@ -16,6 +16,7 @@
   async: 600  # Maximum runtime in seconds. Adjust as needed.
   poll: 0  # Fire and continue (never poll)
   when: not use_docker
+  ignore_errors: yes
 
 - name: Copy core images into docker repo with docker
   shell: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
@@ -24,6 +25,7 @@
   async: 600  # Maximum runtime in seconds. Adjust as needed.
   poll: 0  # Fire and continue (never poll)
   when: use_docker
+  ignore_errors: yes
 
 - name: Wait for core images to finish
   async_status:
@@ -33,16 +35,19 @@
   delay: 30  # Check every 5 seconds. Adjust as you like.
   retries: 10  # Retry up to 10 times. Adjust as needed.
   with_items: "{{ _create_core_images.results }}"
+  ignore_errors: yes
 
 - name: Copy etcd image into docker repo with skopeo
   shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/{{etcd_image}} docker://{{isolated_docker_repo}}/{{etcd_image}}" 
   register: _create_etcd_image
   when: not use_docker
+  ignore_errors: yes
 
 - name: Copy etcd image into docker repo with docker
   shell: "docker pull registry.redhat.io/{{etcd_image}} && docker tag registry.redhat.io/{{etcd_image}} {{isolated_docker_repo}}/{{etcd_image}}  && docker push {{isolated_docker_repo}}/{{etcd_image}}" 
   register: _create_etcd_image
   when: use_docker
+  ignore_errors: yes
 
 - name: Copy additional images into docker repo with skopeo
   shell: "skopeo copy --dest-tls-verify=false docker://registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} docker://{{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
@@ -51,6 +56,7 @@
   async: 600  # Maximum runtime in seconds. Adjust as needed.
   poll: 0  # Fire and continue (never poll)
   when: not use_docker
+  ignore_errors: yes
 
 - name: Copy additional images into docker repo with docker
   shell: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
@@ -76,6 +82,7 @@
   async: 600  # Maximum runtime in seconds. Adjust as needed.
   poll: 0  # Fire and continue (never poll)
   when: not use_docker
+  ignore_errors: yes
 
 - name: Copy s2i images into docker repo with docker
   shell: "docker pull registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} && docker tag registry.redhat.io/openshift3/{{item}}:{{openshift_version_image_tag}} {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}  && docker push {{isolated_docker_repo}}/openshift3/{{item}}:{{openshift_version_image_tag}}" 
@@ -84,6 +91,7 @@
   async: 600  # Maximum runtime in seconds. Adjust as needed.
   poll: 0  # Fire and continue (never poll)
   when: use_docker
+  ignore_errors: yes
 
 - name: Wait for s2i images to finish
   async_status:
@@ -93,6 +101,7 @@
   delay: 30  # Check every 5 seconds. Adjust as you like.
   retries: 10  # Retry up to 10 times. Adjust as needed.
   with_items: "{{ _create_s2i_images.results }}"
+  ignore_errors: yes
 
 - name: Copy nexus3 and gogs into docker repo with skopeo
   shell: "skopeo copy --dest-tls-verify=false docker://docker.io/{{item}}:latest docker://{{isolated_docker_repo}}/{{item}}:latest" 
@@ -101,6 +110,7 @@
     - "sonatype/nexus3"
     - "wkulhanek/gogs"
   when: not use_docker
+  ignore_errors: yes
 
 - name: Copy nexus3 and gogs into docker repo with docker
   shell: "docker pull docker.io/{{item}}:latest && docker tag docker.io/{{item}}:latest {{isolated_docker_repo}}/{{item}}:latest && docker push {{isolated_docker_repo}}/{{item}}:latest" 
@@ -109,3 +119,4 @@
     - "sonatype/nexus3"
     - "wkulhanek/gogs"
   when: use_docker
+  ignore_errors: yes
